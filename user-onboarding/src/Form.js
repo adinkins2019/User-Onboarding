@@ -1,8 +1,17 @@
-import React from 'react'
+import React, {useState, useEffect} from 'react'
 import { withFormik, Form, Field} from 'formik'
 import * as Yup from 'yup'
+import axios from 'axios'
 
-function UserForm({ values, errors, touched}){
+const api = "https://reqres.in/api/users";
+
+function UserForm({ values, errors, touched, status}){
+    const [users, setUsers] = useState([])
+    useEffect(()=>{
+        if(status){
+        setUsers([...users, status])
+        }
+    }, [status])
     return (
         <Form>
             <div>
@@ -22,6 +31,13 @@ function UserForm({ values, errors, touched}){
                     Accept Terms Of Service 
             </label>
             <button>Submit</button>
+            {users.map(user => (
+                <div>Name: {user.username}<br/>
+                Email: {user.email}<br/>
+                Password: {user.password}
+
+                </div>
+            ))}
         </Form>
                 
     );
@@ -50,8 +66,12 @@ const FormikUserForm = withFormik({
     }),
     //======END VALIDATION SCHEMA==========
 
-    handleSubmit(values){
+    handleSubmit(values, {setStatus}){
         console.log(values)
+        axios
+        .post(api, values)
+        .then(response => setStatus(response.data))
+        .catch(err => console.log('Errors: made', err))
     }
     })(UserForm);
   
